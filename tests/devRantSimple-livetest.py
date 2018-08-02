@@ -4,7 +4,8 @@ import devRantSimple as dRS
 
 # print(dRS.getUserRant("ewpratten", 1))
 
-print(dRS.getAvatar("ewpratten", dRS.ImageSize.large))
+# print(dRS.getAvatar("ewpratten", dRS.ImageSize.large))
+
 
 # prevdata = ""
 # i = 0

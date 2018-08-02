@@ -43,11 +43,11 @@ def getRant(Rtype, Rnum):
 	elif Rtype == RantType.recent:
 		sort = "recent"
 	else:
-		print("[dSR]: ERROR! Invalid rant type given in function getRant()\n       Valid types: algo, top, recent")
+		print("[dRS]: ERROR! Invalid rant type given in function getRant()\n       Valid types: algo, top, recent")
 	
 	rant = rawGet("devrant/rants", {"sort":sort, "limit":1, "skip":offset})
 	if rant["success"]:
-		returndata = {"id":rant["rants"][0]["id"], "text:":rant["rants"][0]["text"], "score":rant["rants"][0]["score"], "username":rant["rants"][0]["user_username"]}
+		returndata = {"id":rant["rants"][0]["id"], "text":rant["rants"][0]["text"], "score":rant["rants"][0]["score"], "username":rant["rants"][0]["user_username"], "tags":rant["rants"][0]["tags"]}
 	else:
 		returndata = InvalidResponse
 	return returndata
@@ -55,7 +55,7 @@ def getRant(Rtype, Rnum):
 def getUserRant(user, Rnum):
 	offset = Rnum - 1
 	if not userExsists(user):
-		print("[dSR]: ERROR! Invalid username given in function getUserRant()")
+		print("[dRS]: ERROR! Invalid username given in function getUserRant()")
 	else:
 		userid = getUserId(user)
 		userdata = getUserData(userid, {"skip":offset, "content":"rants"})
@@ -69,7 +69,7 @@ def getUserRant(user, Rnum):
 
 def getAvatar(username, size=ImageSize.small):
 	if not userExsists(username):
-		print("[dSR]: ERROR! Invalid username given in function getUserRant()")
+		print("[dRS]: ERROR! Invalid username given in function getUserRant()")
 	else:
 		uid = getUserId(username)
 		userdata = getUserData(uid, {})
@@ -80,5 +80,23 @@ def getAvatar(username, size=ImageSize.small):
 			imgdata = userdata["profile"]["avatar"]["i"]
 			return "https://avatars.devrant.com/" + imgdata
 		else:
-			print("[dSR]: ERROR! Invalid avatar size given in function getAvatar()")
+			print("[dRS]: ERROR! Invalid avatar size given in function getAvatar()")
 			return InvalidResponse
+
+def login(username, password):
+	if not userExsists(username):
+		print("[dRS]: ERROR! Invalid username given in function login()")
+		return InvalidResponse
+	else:
+		rawdata = requests.post("https://devrant.com/api/users/auth-token", data={"username":username, "password":password, "app":3})
+		rawdata = rawdata.json()
+		if not rawdata["success"]:
+			print("[dRS]: Login error. Wrong password?")
+			return InvalidResponse
+		else:
+			return {"token_id":rawdata["auth_token"]["id"], "token_key":rawdata["auth_token"]["key"], "user_id":rawdata["auth_token"]["user_id"]}
+
+def postRant(text, tags, uid, token, key):
+	rsp = requests.post("https://devrant.com/api/devrant/rants", data={"app":3, "user_id":uid, "token_id":token, "token_key":key, "rant":text, "tags":tags})
+	return rsp
+# debug
