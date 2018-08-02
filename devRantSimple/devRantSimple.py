@@ -10,6 +10,8 @@ appid = 3
 
 # Enums
 RantType = Enum("RantType", "algo top recent")
+ImageSize = Enum("ImageSize", "large small")
+
 InvalidResponse = "dRS.INVALID.."
 
 def getUserId(username):
@@ -27,6 +29,9 @@ def rawGet(endpoint, params):
 	params.update({"app":appid})
 	rawrant = requests.get("https://devrant.com/api/" + endpoint, params=params)
 	return rawrant.json()
+
+def getUserData(userid, params):
+	return rawGet("users/" + str(userid), params)
 
 
 def getRant(Rtype, Rnum):
@@ -53,7 +58,7 @@ def getUserRant(user, Rnum):
 		print("[dSR]: ERROR! Invalid username given in function getUserRant()")
 	else:
 		userid = getUserId(user)
-		userdata = rawGet("users/" + str(userid), {"skip":offset, "content":"rants"})
+		userdata = getUserData(userid, {"skip":offset, "content":"rants"})
 		
 		if userdata["success"] and userdata["profile"]["content"]["content"]["rants"] != []:
 			returndata = {"text":userdata["profile"]["content"]["content"]["rants"][0]["text"], "score":userdata["profile"]["content"]["content"]["rants"][0]["score"], "tags":userdata["profile"]["content"]["content"]["rants"][0]["tags"], "id":userdata["profile"]["content"]["content"]["rants"][0]["id"]}
@@ -61,5 +66,19 @@ def getUserRant(user, Rnum):
 			returndata = InvalidResponse
 		
 		return returndata
-	
-	
+
+def getAvatar(username, size=ImageSize.small):
+	if not userExsists(username):
+		print("[dSR]: ERROR! Invalid username given in function getUserRant()")
+	else:
+		uid = getUserId(username)
+		userdata = getUserData(uid, {})
+		if size == ImageSize.small:
+			imgdata = userdata["profile"]["avatar_sm"]["i"]
+			return "https://avatars.devrant.com/" + imgdata
+		elif size == ImageSize.large:
+			imgdata = userdata["profile"]["avatar"]["i"]
+			return "https://avatars.devrant.com/" + imgdata
+		else:
+			print("[dSR]: ERROR! Invalid avatar size given in function getAvatar()")
+			return InvalidResponse
