@@ -4,6 +4,7 @@
 # Required libs: requests, enum34
 import requests
 from enum import Enum
+# import classes as classes
 
 # devrant api app id
 appid = 3
@@ -11,6 +12,7 @@ appid = 3
 # Enums
 RantType = Enum("RantType", "algo top recent")
 ImageSize = Enum("ImageSize", "large small")
+NotifType = Enum("NotifType", "vote mention content sub")
 
 InvalidResponse = "dRS.INVALID.."
 
@@ -29,6 +31,11 @@ def rawGet(endpoint, params):
 	params.update({"app":appid})
 	rawrant = requests.get("https://devrant.com/api/" + endpoint, params=params)
 	return rawrant.json()
+
+def rawGetnj(endpoint, params):
+	params.update({"app":appid})
+	rawrant = requests.get("https://devrant.com/api/" + endpoint, params=params)
+	return rawrant
 
 def getUserData(userid, params):
 	return rawGet("users/" + str(userid), params)
@@ -101,6 +108,32 @@ def postRant(text, tags, uid, token, key):
 	return rsp
 
 def comment(rantid, text, uid, token, key):
-	rsp = requests.post("https://devrant.com/api/devrant/rants" + str(rantid) + "/comments", data={"app":3, "user_id":uid, "token_id":token, "token_key":key, "comment":text})
+	rsp = requests.post("https://devrant.com/api/devrant/rants/" + str(rantid) + "/comments", data={"app":3, "user_id":uid, "token_id":token, "token_key":key, "comment":text, "plat":2})
+	return rsp.json()
+
+def getNotifs(uid, token, key):
+	rsp = requests.get("https://devrant.com/api/users/me/notif-feed", params={"user_id":uid, "token_id":token, "token_key":key, "app":"3"})
+	return rsp.json()
+
+def vote(rantid, uid, token, key, vote):
+	rsp = requests.post("https://devrant.com/api/devrant/rants/" + str(rantid) + "/vote", data={"app":3, "user_id":uid, "token_id":token, "token_key":key, "vote":vote, "plat":3})
+	return rsp.json()
+
+def getIdRant(rantid):
+	rsp = rawget("/devrant/rants/" + str(rantid), {})
 	return rsp
+
+def getRantFromId(rantid):
+	rant = getIdRant(rantid)
+	if rant["success"]:
+		returndata = {"id":rant["rants"][0]["id"], "text":rant["rants"][0]["text"], "score":rant["rants"][0]["score"], "username":rant["rants"][0]["user_username"], "tags":rant["rants"][0]["tags"]}
+	else:
+		returndata = InvalidResponse
+	return returndata
+	
+def getIdComment(rid, cid, uid, token, key):
+	print([uid, token, key])
+	rsp = rawGetnj("/comments" + str(cid), {"user_id":uid, "token_id":token, "token_key":key})
+	print(cid)
+	print(rsp)
 # debug
