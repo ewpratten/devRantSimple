@@ -16,6 +16,13 @@ NotifType = Enum("NotifType", "vote mention content sub")
 
 InvalidResponse = "dRS.INVALID.."
 
+
+def genRantCode(rid):
+	return str('{0:x}'.format(int(rid)))
+
+def genRantId(rcode):
+	return int(rcode, 16)
+
 def getUserId(username):
 	data = rawGet("get-user-id", {"username":username})
 	return data["user_id"]
@@ -115,25 +122,29 @@ def getNotifs(uid, token, key):
 	rsp = requests.get("https://devrant.com/api/users/me/notif-feed", params={"user_id":uid, "token_id":token, "token_key":key, "app":"3"})
 	return rsp.json()
 
+def clearNotifs(uid, token, key):
+	rsp = requests.delete("https://devrant.com/api/users/me/notif-feed", params={"user_id":uid, "token_id":token, "token_key":key, "app":"3"})
+	return rsp.json()
+
 def vote(rantid, uid, token, key, vote):
 	rsp = requests.post("https://devrant.com/api/devrant/rants/" + str(rantid) + "/vote", data={"app":3, "user_id":uid, "token_id":token, "token_key":key, "vote":vote, "plat":3})
 	return rsp.json()
 
 def getIdRant(rantid):
-	rsp = rawget("/devrant/rants/" + str(rantid), {})
+	rsp = rawGet("devrant/rants/" + str(rantid), {})
 	return rsp
 
 def getRantFromId(rantid):
+	# print(rantid)
 	rant = getIdRant(rantid)
+	# print(rant)
 	if rant["success"]:
-		returndata = {"id":rant["rants"][0]["id"], "text":rant["rants"][0]["text"], "score":rant["rants"][0]["score"], "username":rant["rants"][0]["user_username"], "tags":rant["rants"][0]["tags"]}
+		returndata = {"id":rant["rant"]["id"], "text":rant["rant"]["text"], "score":rant["rant"]["score"], "username":rant["rant"]["user_username"], "tags":rant["rant"]["tags"], "comments":rant["comments"]}
 	else:
 		returndata = InvalidResponse
 	return returndata
 	
 def getIdComment(rid, cid, uid, token, key):
-	print([uid, token, key])
-	rsp = rawGetnj("/comments" + str(cid), {"user_id":uid, "token_id":token, "token_key":key})
-	print(cid)
-	print(rsp)
+	rsp = requests.get("https://devrant.com/api/comments/"+ str(cid), params={"user_id":uid, "token_id":token, "token_key":key, "app":3})
+	return rsp.json()
 # debug
