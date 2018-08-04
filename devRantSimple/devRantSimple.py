@@ -112,7 +112,7 @@ def login(username, password):
 
 def postRant(text, tags, uid, token, key):
 	rsp = requests.post("https://devrant.com/api/devrant/rants", data={"app":3, "user_id":uid, "token_id":token, "token_key":key, "rant":text, "tags":tags})
-	return rsp
+	return rsp.json()
 
 def comment(rantid, text, uid, token, key):
 	rsp = requests.post("https://devrant.com/api/devrant/rants/" + str(rantid) + "/comments", data={"app":3, "user_id":uid, "token_id":token, "token_key":key, "comment":text, "plat":2})

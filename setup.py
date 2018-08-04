@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name='devRantSimple',
-    version='1.10',
+    version='2.0',
     description='A simple devRant api wrapper for the lazy people',
     url='https://github.com/Ewpratten/devRantSimple',
     author='Evan Pratten',
